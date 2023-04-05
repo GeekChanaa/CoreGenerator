@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using YourNamespace.Models;
+using <%= projectName %>.Models;
 
-namespace YourNamespace.Data
+namespace <%= projectName %>.Data
 {
-    public class YourDbContext : DbContext
+    public class <%= projectName %>DbContext : DbContext
     {
-        public YourDbContext(DbContextOptions<YourDbContext> options) : base(options)
+        public <%= projectName %>DbContext(DbContextOptions<<%= projectName %>DbContext> options) : base(options)
         {
         }
 
