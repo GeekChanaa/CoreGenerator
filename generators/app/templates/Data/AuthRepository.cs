@@ -34,18 +34,11 @@ namespace <%= projectName %>.Data
         }
 
         public async Task<User> Login(string email, string password){
-            var user = await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(x => x.Email == email);
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
             if(user == null)
                 return null;
             if(!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
                 return null;
-            if(user.Role.Name == "EMPLOYEE")
-            {
-                var employee = await _context.Employees.FirstOrDefaultAsync(u => u.UserID == user.ID);
-                employee.QrCode = RandomString.RandString(64);
-                this._context.Entry(employee).State = EntityState.Modified;
-                await this._context.SaveChangesAsync();
-            }
             return user;
         }
 

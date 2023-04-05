@@ -54,8 +54,13 @@ module.exports = class extends Generator {
     // Creating the application + adding required nuget packages
     this._writeSolutionFiles();
 
+    // Add repository and database context
+    this._addDbRepository();
+
     // Add Authentication
     this._addAuth();
+
+    
   }
 
   _writeSolutionFiles() {
@@ -168,6 +173,23 @@ module.exports = class extends Generator {
       this.destinationPath('Models/User.cs'),
       { projectName: this.props.appName }
     );
+
+    const dbContextPath = this.destinationPath('Data/DbContext.cs');
+    // Updating DbContext to add users dbset
+    const dbContextConten = this.fs.read(dbContextPath);
+    const newdbContextConten = dbContextConten.replace(
+      '// Add any Dbset configurations here',
+      'public DbSet<User> Users { get; set; }',
+    );
+  
+    this.fs.write(dbContextPath, newdbContextConten);
+    this.fs.copyTpl(
+      this.templatePath('Helpers/RandomString.cs'),
+      this.destinationPath('Helpers/RandomString.cs'),
+      { projectName: this.props.appName }
+    );
+
+    
 
     // Copying Dtos for authentication
     this.fs.copyTpl(

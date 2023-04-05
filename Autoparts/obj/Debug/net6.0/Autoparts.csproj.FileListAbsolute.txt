@@ -1,7 +1,0 @@
-C:\Users\XPS\OneDrive\Bureau\Projects\Personal Projects\generator-coregenerator\generator-dotnet-webapi\Autoparts\obj\Debug\net6.0\Autoparts.csproj.AssemblyReference.cache
-C:\Users\XPS\OneDrive\Bureau\Projects\Personal Projects\generator-coregenerator\generator-dotnet-webapi\Autoparts\obj\Debug\net6.0\Autoparts.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\XPS\OneDrive\Bureau\Projects\Personal Projects\generator-coregenerator\generator-dotnet-webapi\Autoparts\obj\Debug\net6.0\Autoparts.AssemblyInfoInputs.cache
-C:\Users\XPS\OneDrive\Bureau\Projects\Personal Projects\generator-coregenerator\generator-dotnet-webapi\Autoparts\obj\Debug\net6.0\Autoparts.AssemblyInfo.cs
-C:\Users\XPS\OneDrive\Bureau\Projects\Personal Projects\generator-coregenerator\generator-dotnet-webapi\Autoparts\obj\Debug\net6.0\Autoparts.csproj.CoreCompileInputs.cache
-C:\Users\XPS\OneDrive\Bureau\Projects\Personal Projects\generator-coregenerator\generator-dotnet-webapi\Autoparts\obj\Debug\net6.0\Autoparts.MvcApplicationPartsAssemblyInfo.cs
-C:\Users\XPS\OneDrive\Bureau\Projects\Personal Projects\generator-coregenerator\generator-dotnet-webapi\Autoparts\obj\Debug\net6.0\Autoparts.MvcApplicationPartsAssemblyInfo.cache

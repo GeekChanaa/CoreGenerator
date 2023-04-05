@@ -9,9 +9,9 @@ namespace <%= projectName %>.Data.Repositories
 {
     public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     {
-        protected readonly YourDbContext Context;
+        protected readonly <%= projectName %>DbContext Context;
 
-        public Repository(YourDbContext context)
+        public Repository(<%= projectName %>DbContext context)
         {
             Context = context;
         }
@@ -59,7 +59,6 @@ namespace <%= projectName %>.Data.Repositories
         public async Task<IEnumerable<TEntity>> GetPagedAsync(
             Expression<Func<TEntity, bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
-            string search = null,
             int? pageNumber = null,
             int? pageSize = null)
         {
@@ -70,12 +69,6 @@ namespace <%= projectName %>.Data.Repositories
                 query = query.Where(filter);
             }
 
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                // Define the search expression for your TEntity
-                Expression<Func<TEntity, bool>> searchExpression = //...;
-                query = query.Where(searchExpression);
-            }
 
             if (orderBy != null)
             {

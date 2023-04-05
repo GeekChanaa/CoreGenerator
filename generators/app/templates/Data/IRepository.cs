@@ -15,6 +15,6 @@ namespace <%= projectName %>.Data.Repositories
         void Remove(TEntity entity);
         void RemoveRange(IEnumerable<TEntity> entities);
         void Update(TEntity entity);
-        Task<IEnumerable<TEntity>> GetPagedAsync( Expression<Func<TEntity, bool>> filter, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy, string search, int? pageNumber, int? pageSize);
+        Task<IEnumerable<TEntity>> GetPagedAsync( Expression<Func<TEntity, bool>> filter, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy, int? pageNumber, int? pageSize);
     }
 }
