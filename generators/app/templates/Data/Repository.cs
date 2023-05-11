@@ -9,51 +9,54 @@ namespace <%= projectName %>.Data.Repositories
 {
     public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     {
-        protected readonly <%= projectName %>DbContext Context;
+        protected readonly <%= projectName %>DbContext _context;
 
         public Repository(<%= projectName %>DbContext context)
         {
-            Context = context;
+            _context = context;
         }
 
         public async Task<IEnumerable<TEntity>> GetAllAsync()
         {
-            return await Context.Set<TEntity>().ToListAsync();
+            return await _context.Set<TEntity>().ToListAsync();
         }
 
         public async Task<TEntity> GetByIdAsync(int id)
         {
-            return await Context.Set<TEntity>().FindAsync(id);
+            return await _context.Set<TEntity>().FindAsync(id);
         }
 
         public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate)
         {
-            return await Context.Set<TEntity>().Where(predicate).ToListAsync();
+            return await _context.Set<TEntity>().Where(predicate).ToListAsync();
         }
 
         public async Task AddAsync(TEntity entity)
         {
-            await Context.Set<TEntity>().AddAsync(entity);
+            await _context.Set<TEntity>().AddAsync(entity);
         }
 
                 public async Task AddRangeAsync(IEnumerable<TEntity> entities)
         {
-            await Context.Set<TEntity>().AddRangeAsync(entities);
+            await _context.Set<TEntity>().AddRangeAsync(entities);
         }
 
-        public void Remove(TEntity entity)
+        public async Task Remove(TEntity entity)
         {
-            Context.Set<TEntity>().Remove(entity);
+            _context.Set<TEntity>().Remove(entity);
+            await _context.SaveChangesAsync();
         }
 
-        public void RemoveRange(IEnumerable<TEntity> entities)
+        public async Task RemoveRange(IEnumerable<TEntity> entities)
         {
-            Context.Set<TEntity>().RemoveRange(entities);
+            _context.Set<TEntity>().RemoveRange(entities);
+            await _context.SaveChangesAsync();
         }
 
-        public void Update(TEntity entity)
+        public async Task Update(TEntity entity)
         {
-            Context.Set<TEntity>().Update(entity);
+            _context.Set<TEntity>().Entry(entity).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<TEntity>> GetPagedAsync(
@@ -62,7 +65,7 @@ namespace <%= projectName %>.Data.Repositories
             int? pageNumber = null,
             int? pageSize = null)
         {
-            IQueryable<TEntity> query = Context.Set<TEntity>();
+            IQueryable<TEntity> query = _context.Set<TEntity>();
 
             if (filter != null)
             {

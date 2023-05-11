@@ -67,7 +67,7 @@ namespace <%= projectName %>.Data
         // Getting user
         public Task<User> GetUser(int id){
             // Getting The user and some of its navigation properties
-            var user = _context.Users.Include(u=> u.Role).ThenInclude(u=> u.RolePrivileges).ThenInclude(u => u.Privilege).FirstOrDefaultAsync(u => u.ID == id);
+            var user = _context.Users.FirstOrDefaultAsync(u => u.ID == id);
             return user;
         }
     }

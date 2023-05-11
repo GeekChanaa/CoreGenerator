@@ -51,16 +51,63 @@ module.exports = class extends Generator {
   }
 
   async writing() {
+
     // Creating the application + adding required nuget packages
     this._writeSolutionFiles();
 
     // Add repository and database context
     this._addDbRepository();
 
+
+    
+
+    
+
     // Add Authentication
     this._addAuth();
 
+    // Add generic Controller
+    this._addGenericController();
+
+    // Read the JSON file
+    const modelsData = this.fs.read(this.templatePath('models.json'), 'utf8');
+    const models = JSON.parse(modelsData);
+
+    // Loop over the models and generate a model and controller for each one
+    for (const model of models) {
+      this._generateModel(model);
+      this._generateController(model);
+    }
+
     
+  }
+
+  _generateModel(model) {
+    const destinationPath = this.destinationPath(`Models/${model.name}.cs`);
+
+    this.fs.copyTpl(
+      this.templatePath('Models/Model.cs'),
+      destinationPath,
+      { 
+        projectName: this.props.appName,
+        modelName : model.name,
+        fields : model.fields
+      }
+    );
+  }
+
+  _generateController(model) {
+    const destinationPath = this.destinationPath(`Controllers/${model.name}Controller.cs`);
+
+    this.fs.copyTpl(
+      this.templatePath('Controllers/Controller.cs'),
+      destinationPath,
+      { 
+        projectName: this.props.appName,
+        modelName : model.name,
+        fields : model.fields
+      }
+    );
   }
 
   _writeSolutionFiles() {
@@ -77,37 +124,12 @@ module.exports = class extends Generator {
     this.spawnCommandSync('dotnet', ['add', 'package', 'Microsoft.EntityFrameworkCore']);
     this.spawnCommandSync('dotnet', ['add', 'package', 'Microsoft.EntityFrameworkCore.Design']);
 
-    // // Copy the base templates to the project
-    // this.fs.copyTpl(
-    //   this.templatePath('templates/src/'),
-    //   this.destinationPath('src/'),
-    //   { projectName: this.appName }
-    // );
-
-    // this.fs.copy(
-    //   this.templatePath('templates/.gitignore'),
-    //   this.destinationPath('.gitignore')
-    // );
-    // this.fs.copy(
-    //   this.templatePath('templates/appsettings.json'),
-    //   this.destinationPath('appsettings.json')
-    // );
-    // this.fs.copy(
-    //   this.templatePath('templates/appsettings.Development.json'),
-    //   this.destinationPath('appsettings.Development.json')
-    // );
-    // this.fs.copy(
-    //   this.templatePath('templates/Program.cs'),
-    //   this.destinationPath('Program.cs')
-    // );
-    // this.fs.copy(
-    //   this.templatePath('templates/README.md'),
-    //   this.destinationPath('README.md')
-    // );
-    // this.fs.copy(
-    //   this.templatePath('templates/Startup.cs'),
-    //   this.destinationPath('Startup.cs')
-    // );
+    //Copy the base templates to the project
+    this.fs.copyTpl(
+      this.templatePath('Program.cs'),
+      this.destinationPath('Program.cs'),
+      { projectName: this.props.appName }
+    );
   }
 
   //function that updates the Startup.cs file with the appropriate database configuration based on the user's choice:
@@ -123,12 +145,16 @@ module.exports = class extends Generator {
       options.UseMySql(Configuration.GetConnectionString("DefaultConnection"),
       ServerVersion.AutoDetect(Configuration.GetConnectionString("DefaultConnection"))));`,
     };
+    
+
   
     const startupContent = this.fs.read(startupFilePath);
     const newStartupContent = startupContent.replace(
       '// Add your DbContext configuration here',
       databaseConfigSnippet[this.options.databaseProvider]
     );
+
+    
   
     this.fs.write(startupFilePath, newStartupContent);
   }
@@ -151,6 +177,23 @@ module.exports = class extends Generator {
       this.destinationPath('Data/DbContext.cs'),
       { projectName: this.props.appName }
     );
+
+    this.spawnCommandSync('dotnet', ['add', 'package', 'Microsoft.EntityFrameworkCore.SqlServer']);
+
+    // Registring the repository
+    const programContentPath = this.destinationPath('Program.cs');
+    const programContent = this.fs.read(programContentPath);
+    var programContentNew = programContent.replace(
+      '// Add your Repository registration here ',
+      'builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));'
+    );
+
+    programContentNew = programContentNew.replace(
+      '// Add your DbContext configuration here',
+      `services.AddDbContext<YourDbContext>(options =>
+        options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));`
+    )
+    this.fs.write(programContentPath, programContentNew);
   }
 
 
@@ -258,6 +301,16 @@ module.exports = class extends Generator {
       },
     };
     this.fs.writeJSON(appSettingsPath, appSettingsContent);
+  }
+
+  _addGenericController()
+  {
+    // Copying Generic Controller for authentication
+    this.fs.copyTpl(
+      this.templatePath('Controllers/GenericController.cs'),
+      this.destinationPath('Controllers/GenericController.cs'),
+      { projectName: this.props.appName }
+    );
   }
 
 

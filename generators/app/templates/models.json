@@ -1,0 +1,20 @@
+[
+    {
+      "name": "Person",
+      "fields": [
+        { "name": "Id", "type": "int" },
+        { "name": "Username", "type": "string" },
+        { "name": "Email", "type": "string" }
+      ]
+    },
+    {
+      "name": "Product",
+      "fields": [
+        { "name": "Id", "type": "int" },
+        { "name": "ProductName", "type": "string" },
+        { "name": "ProductDescription", "type": "string" },
+        { "name": "Price", "type": "decimal" }
+      ]
+    }
+  ]
+  
