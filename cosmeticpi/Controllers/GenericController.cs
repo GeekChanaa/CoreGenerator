@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using <%= projectName %>.Data;
-using <%= projectName %>.Models;
-using <%= projectName %>.Dtos;
+using cosmeticpi.Data;
+using cosmeticpi.Models;
+using cosmeticpi.Dtos;
 using System.Threading.Tasks;
 using System.Security.Claims;
 using System.Text;
@@ -11,9 +11,9 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net;
-using <%= projectName %>.Data.Repositories;
+using cosmeticpi.Data.Repositories;
 
-namespace <%= projectName %>.Controllers
+namespace cosmeticpi.Controllers
 {
 
     [Route("api/[controller]")]

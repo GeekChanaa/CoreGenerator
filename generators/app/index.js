@@ -41,7 +41,26 @@ module.exports = class extends Generator {
         name: 'includeMailingService',
         message: 'Do you want to include a mailing service?',
         default: false,
+      },{
+        type: 'input',
+        name: 'server',
+        message: 'Enter the server name:',
       },
+      {
+        type: 'input',
+        name: 'database',
+        message: 'Enter the database name:',
+      },
+      {
+        type: 'input',
+        name: 'user',
+        message: 'Enter the username:',
+      },
+      {
+        type: 'password',
+        name: 'password',
+        message: 'Enter the password:',
+      }
     ];
 
     return this.prompt(prompts).then(props => {
@@ -51,17 +70,24 @@ module.exports = class extends Generator {
   }
 
   async writing() {
-
     // Creating the application + adding required nuget packages
     this._writeSolutionFiles();
+    const appSettingsPath = this.destinationPath('appsettings.json');
+    let appSettings = this.fs.readJSON(appSettingsPath);
 
+    if (!appSettings) {
+      appSettings = {};
+    }
+    if (!appSettings.ConnectionStrings) {
+      appSettings.ConnectionStrings = {};
+    }
+
+    appSettings.ConnectionStrings.DefaultConnection = 
+      `Server=${this.props.server};Database=${this.props.database};User Id=${this.props.user};Password=${this.props.password};`;
+
+    this.fs.writeJSON(appSettingsPath, appSettings);
     // Add repository and database context
     this._addDbRepository();
-
-
-    
-
-    
 
     // Add Authentication
     this._addAuth();
@@ -137,13 +163,13 @@ module.exports = class extends Generator {
     const startupFilePath = this.destinationPath('Startup.cs');
   
     const databaseConfigSnippet = {
-      sqlserver: `services.AddDbContext<YourDbContext>(options =>
-      options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));`,
-      postgresql: `services.AddDbContext<YourDbContext>(options =>
-      options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));`,
-      mysql: `services.AddDbContext<YourDbContext>(options =>
-      options.UseMySql(Configuration.GetConnectionString("DefaultConnection"),
-      ServerVersion.AutoDetect(Configuration.GetConnectionString("DefaultConnection"))));`,
+      sqlserver: `builder.Services.AddDbContext<${this.props.appName}>(options =>
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));`,
+      postgresql: `builder.Services.AddDbContext<${this.props.appName}>(options =>
+      options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));`,
+      mysql: `builder.Services.AddDbContext<${this.props.appName}>(options =>
+      options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
+      ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));`,
     };
     
 
@@ -190,8 +216,8 @@ module.exports = class extends Generator {
 
     programContentNew = programContentNew.replace(
       '// Add your DbContext configuration here',
-      `services.AddDbContext<YourDbContext>(options =>
-        options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));`
+      `builder.Services.AddDbContext<${this.props.appName}DbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));`
     )
     this.fs.write(programContentPath, programContentNew);
   }
@@ -218,14 +244,29 @@ module.exports = class extends Generator {
     );
 
     const dbContextPath = this.destinationPath('Data/DbContext.cs');
-    // Updating DbContext to add users dbset
-    const dbContextConten = this.fs.read(dbContextPath);
-    const newdbContextConten = dbContextConten.replace(
+    const dbContextContent = this.fs.read(dbContextPath);
+
+    let newDbContextContent = dbContextContent;
+
+    // Assuming your models are in a file named 'models.json' in the same directory
+    let models = this.fs.readJSON(this.templatePath('models.json'));
+
+    // Adding the user dbset in the db context
+    newDbContextContent = newDbContextContent.replace(
       '// Add any Dbset configurations here',
-      'public DbSet<User> Users { get; set; }',
+      'public DbSet<User> Users { get; set; }\n' + '// Add any Dbset configurations here',
     );
-  
-    this.fs.write(dbContextPath, newdbContextConten);
+    for (let model of models) {
+      let modelName = model.name;  // Assuming each model has a 'name' field
+      let dbSetLine = `public DbSet<${modelName}> ${modelName}s { get; set; }\n`;
+      
+      newDbContextContent = newDbContextContent.replace(
+        '// Add any Dbset configurations here',
+        dbSetLine + '// Add any Dbset configurations here'
+      );
+    }
+
+    this.fs.write(dbContextPath, newDbContextContent);
     this.fs.copyTpl(
       this.templatePath('Helpers/RandomString.cs'),
       this.destinationPath('Helpers/RandomString.cs'),
